@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	_ "github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"
 	. "github.com/x-ream/sqlxb"
 )
@@ -30,7 +31,6 @@ func testBulderX() {
 	cat := Cat{}
 	dog := Dog{}
 
-	//"COUNT(DISTINCT d.id) AS `d.id_count`"
 
 	builder := NewBuilderX(&cat,"c")
 	builder.ResultKeys( "distinct c.color","COUNT(DISTINCT d.id) AS `d.id_count`")//"COUNT(DISTINCT d.id) AS `d.id_count`"
@@ -45,9 +45,8 @@ func testBulderX() {
 	sub.ResultKeys("pet_id").Source(&dog).Eq("age",2).In("weight",arr...)
 	builder.SourceBuilder().Sub(sub).Alia("d").JoinOn(LEFT_JOIN,ON("id","c","pet_id"))
 
-	builder.SourceBuilder().Source(&cat).Alia("c").JoinOn(INNER_JOIN,ON("pet_id","p","id"))
-	builder.Agg("GROUP BY p.id").
-		GroupBy("c.color").
+	builder.SourceBuilder().Source(&cat).Alia("cat").JoinOn(INNER_JOIN,ON("pet_id","p","id"))
+	builder.GroupBy("c.color").
 		Having(Gt,"id",1000).
 		Sort("p.id",DESC).
 		Paged().Rows(10).Last(101)
@@ -60,5 +59,6 @@ func testBulderX() {
 }
 
 func main()  {
-
+	InitDB()
+	testBulderX()
 }
